@@ -1,16 +1,14 @@
 import etcd
-import json
 import argparse
 
 from urllib3.exceptions import TimeoutError
 
 
-def first_read(client):
-    res = client.read('/', recursive=True)
-    print res
-
 parser = argparse.ArgumentParser()
 
+parser.add_argument(
+    "config_path",
+    help="Path to the file where the configuration will be stored")
 parser.add_argument(
     "host",
     help="Host to connect to at start")
@@ -20,16 +18,26 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+config_path = args.config_path
 host = args.host
-port =int(args.port)
+port = int(args.port)
 
 client = etcd.Client(host=host, port=port)
 
-first_read(client)
+_write_config(client, config_path)
 
-while False:
+while True:
     try:
-        res = client.read('/', wait=True, recursive=True, timeout=None)
-        print res.key
+        client.read('/', wait=True, recursive=True, timeout=None)
+        _write_config(client, config_path)
     except TimeoutError as e:
         pass
+
+
+def _write_config(client, path):
+    res = client.read('/', recursive=True)
+    try:
+        with open(path, 'w') as f:
+            f.write(res)
+    except IOError as e:
+        print('({0})'.format(e))
