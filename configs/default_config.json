@@ -1,0 +1,22 @@
+{
+    "server": {
+        "default_username": "",
+        "hosts": [{
+            "username": "",
+            "url": ""
+        }],
+        "key_filenames": [
+            ""
+        ]
+    },
+    "client": {
+        "default_username": "",
+        "hosts": [{
+            "username": "",
+            "url": ""
+        }],
+        "key_filenames": [
+            ""
+        ]
+    }
+}
