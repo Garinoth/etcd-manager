@@ -1,4 +1,4 @@
-etcd-localized-manager
+etcd-manager
 ======================
 
-Tool that is capable to install etcd servers and an etcd client that is capable of keeping a configuration file up to date, from a local machine
+A tool for installing and managing from a local machine both etcd clusters, and lightweight clients that are able of keeping a configuration file up to date in the client machines 
