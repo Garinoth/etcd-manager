@@ -25,7 +25,7 @@ def load_config(filepath="configs/default_config.json", kind="server"):
 
 
 @task
-def install_go(filepath="lib/go.tar.gz"):
+def install_go(filepath):
     run('mkdir -p tmp')
     put(filepath, 'tmp')
     filename = filepath.split('/')[-1]
@@ -39,7 +39,7 @@ def install_go(filepath="lib/go.tar.gz"):
 
 
 @task
-def install_etcd(filepath="lib/etcd.tar.gz"):
+def install_etcd(filepath):
     run('mkdir -p tmp')
     #put(filepath, 'tmp')
     filename = filepath.split('/')[-1]
@@ -100,6 +100,11 @@ def restart():
 
 @task
 @runs_once
-def install_server(go_file, etcd_file):
+def install_server(go_file="lib/go.tar.gz", etcd_file="lib/etcd.tar.gz"):
     execute(install_go, go_file)
     execute(install_etcd, etcd_file)
+
+
+@task
+def install_client():
+    pass
