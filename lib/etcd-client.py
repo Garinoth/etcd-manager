@@ -1,7 +1,25 @@
 import etcd
 import argparse
+import os
+import json
 
 from urllib3.exceptions import TimeoutError
+
+
+def _write_config(client, path):
+    print 'Writing!'
+    res = client.read('/', recursive=True)
+
+    result = {}
+    for o in res.leaves:
+        result[o.key] = o.value
+
+    result = json.dumps(result)
+    try:
+        with open(path, 'w') as f:
+            f.write(result)
+    except IOError as e:
+        print('({0})'.format(e))
 
 
 parser = argparse.ArgumentParser()
@@ -18,7 +36,12 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-config_path = args.config_path
+if not os.path.isdir(args.config_path):
+    config_path = args.config_path
+else:
+    print('The config path "{0}" is not a file'.format(args.config_path))
+    exit(1)
+
 host = args.host
 port = int(args.port)
 
@@ -28,16 +51,8 @@ _write_config(client, config_path)
 
 while True:
     try:
-        client.read('/', wait=True, recursive=True, timeout=None)
+        client.read('/', wait=True, recursive=True, timeout=5)
         _write_config(client, config_path)
     except TimeoutError as e:
+        print 'timeout!'
         pass
-
-
-def _write_config(client, path):
-    res = client.read('/', recursive=True)
-    try:
-        with open(path, 'w') as f:
-            f.write(res)
-    except IOError as e:
-        print('({0})'.format(e))
