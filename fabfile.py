@@ -4,27 +4,32 @@ from fabric.api import *
 
 
 @task
-def load_config(filepath="configs/default_config.json", kind="server"):
+def load_config(filepath="configs/default_config.json"):
     try:
         with open(filepath) as f:
             conf = json.load(f)
 
-        env.user = conf[kind]["default_username"]
-        env.key_filename = conf[kind]["key_filenames"]
+        env.key_filename = []
+        roles = {}
+        for r in conf.keys():
+            for k in conf[r]["key_filenames"]:
+                env.key_filename.append(k)
 
-        env.hosts = []
-        for h in conf[kind]["hosts"]:
-            if h["username"] != "":
+            roles[r] = []
+            for h in conf[r]["hosts"]:
                 host = '{0}@{1}'.format(h["username"], h["url"])
-            else:
-                host = '{0}'.format(h["url"])
-            env.hosts.append(host)
+                roles[r].append(host)
 
+        env.roledefs.update(roles)
+
+        print env.roledefs
+        print env.key_filename
     except IOError as e:
         print('({0})'.format(e))
 
 
 @task
+@roles('server')
 def install_go(filepath):
     run('mkdir -p tmp')
     put(filepath, 'tmp')
@@ -39,9 +44,10 @@ def install_go(filepath):
 
 
 @task
+@roles('server')
 def install_etcd(filepath):
     run('mkdir -p tmp')
-    #put(filepath, 'tmp')
+    put(filepath, 'tmp')
     filename = filepath.split('/')[-1]
     run('tar -xzf tmp/{0}'.format(filename))
     run('''
@@ -84,21 +90,7 @@ end script
 
 
 @task
-def start():
-    sudo('start etcd')
-
-
-@task
-def stop():
-    sudo('stop etcd')
-
-
-@task
-def restart():
-    sudo('restart etcd')
-
-
-@task
+@roles('server')
 @runs_once
 def install_server(go_file="lib/go.tar.gz", etcd_file="lib/etcd.tar.gz"):
     execute(install_go, go_file)
@@ -106,5 +98,40 @@ def install_server(go_file="lib/go.tar.gz", etcd_file="lib/etcd.tar.gz"):
 
 
 @task
-def install_client():
-    pass
+@roles('server')
+def start_server():
+    sudo('start etcd')
+
+
+@task
+@roles('server')
+def stop_server():
+    sudo('stop etcd')
+
+
+@task
+@roles('server')
+def restart_server():
+    sudo('restart etcd')
+
+
+@task
+@roles('client')
+def install_client(filepath='lib/python-etcd-master.tar.gz'):
+    run('mkdir -p tmp')
+    put(filepath, 'tmp')
+    filename = filepath.split('/')[-1]
+    run('tar -xzf tmp/{0}'.format(filename))
+    run('sudo apt-get install -y python-pip python-dev libffi-dev libssl-dev')
+    run('''
+        cd python-etcd-master
+        sudo python setup.py install
+        cd
+        ''')
+    put('lib/etcd-client.py')
+
+
+@task
+@roles('client')
+def start_client(config_path, host, port=4001):
+    run('python etcd-client.py {0} {1} {2} &'.format(config_path, host, port))

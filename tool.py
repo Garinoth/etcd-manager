@@ -33,7 +33,10 @@ if action in dir(fabfile):
     execute(getattr(fabfile, action), *arguments)
 
 elif action in dir(actions):
-    arguments.append(env.hosts[0])
+    arguments.append(env.roledefs["server"][0])
     arguments.append(4001)
     res = getattr(actions, action)(*arguments)
     print res
+
+else:
+    print 'Unrecognized action'

@@ -1,25 +1,20 @@
 {
     "server": {
-        "default_username": "ubuntu",
         "hosts": [{
             "username": "ubuntu",
-            "url": "ec2-54-72-239-68.eu-west-1.compute.amazonaws.com"
-        }, {
-            "username": "ubuntu",
-            "url": "ec2-54-72-239-68.eu-west-1.compute.amazonaws.com"
-        }, {
-            "username": "ubuntu",
-            "url": "ec2-54-72-239-68.eu-west-1.compute.amazonaws.com"
+            "url": "ec2-54-76-108-39.eu-west-1.compute.amazonaws.com"
         }],
         "key_filenames": [
             "/home/garinoth/Dropbox/AWS/aws-personal.pem"
         ]
     },
     "client": {
-        "default_username": "ubuntu",
         "hosts": [{
             "username": "ubuntu",
-            "url": "ec2-54-72-239-68.eu-west-1.compute.amazonaws.com"
+            "url": "ec2-54-76-108-45.eu-west-1.compute.amazonaws.com"
+        }, {
+            "username": "ubuntu",
+            "url": "ec2-54-72-182-147.eu-west-1.compute.amazonaws.com"
         }],
         "key_filenames": [
             "/home/garinoth/Dropbox/AWS/aws-personal.pem"
