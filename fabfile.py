@@ -21,9 +21,8 @@ def load_config(filepath="configs/default_config.json"):
                 roles[r].append(host)
 
         env.roledefs.update(roles)
+        env.client = conf["client"]
 
-        print env.roledefs
-        print env.key_filename
     except IOError as e:
         print('({0})'.format(e))
 
@@ -83,7 +82,7 @@ end script
             except OSError:
                 pass
     except IOError as e:
-        print('({0})'.format(e))
+        print('ERROR: {0}'.format(e))
 
     put('etcd.conf', 'tmp')
     sudo('mv tmp/etcd.conf /etc/init/etcd.conf')
@@ -129,9 +128,53 @@ def install_client(filepath='lib/python-etcd-master.tar.gz'):
         cd
         ''')
     put('lib/etcd-client.py')
+    pwd = run('pwd')
+    upstart_script = '''
+description "etcd client"
+
+start on startup
+stop on shutdown
+
+respawn
+respawn limit 15 5
+
+script
+    python {0}/etcd-client.py {1} {2} 4001 >> /var/log/etcd-client.log 2>&1
+end script
+
+post-start script
+end script
+'''.format(pwd, '{0}/{1}'.format(pwd, env.client["config_path"]), env.roledefs["server"][0])
+    try:
+        f = open('etcd-client.conf', 'w')
+        try:
+            f.write(upstart_script)
+        finally:
+            f.close()
+            try:
+                os.remove(filename)
+            except OSError:
+                pass
+    except IOError as e:
+        print('ERROR: {0}'.format(e))
+
+    put('etcd-client.conf', 'tmp')
+    sudo('mv tmp/etcd-client.conf /etc/init/etcd-client.conf')
 
 
 @task
 @roles('client')
-def start_client(config_path, host, port=4001):
-    run('python etcd-client.py {0} {1} {2} &'.format(config_path, host, port))
+def start_client():
+    sudo('start etcd-client')
+
+
+@task
+@roles('client')
+def stop_client():
+    sudo('stop etcd-client')
+
+
+@task
+@roles('client')
+def restart_client():
+    sudo('restart etcd-client')

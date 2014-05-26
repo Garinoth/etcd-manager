@@ -1,6 +1,5 @@
 {
     "server": {
-        "default_username": "",
         "hosts": [{
             "username": "",
             "url": ""
@@ -10,7 +9,6 @@
         ]
     },
     "client": {
-        "default_username": "",
         "hosts": [{
             "username": "",
             "url": ""

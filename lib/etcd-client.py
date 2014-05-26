@@ -7,7 +7,6 @@ from urllib3.exceptions import TimeoutError
 
 
 def _write_config(client, path):
-    print 'Writing!'
     res = client.read('/', recursive=True)
 
     result = {}
@@ -19,7 +18,7 @@ def _write_config(client, path):
         with open(path, 'w') as f:
             f.write(result)
     except IOError as e:
-        print('({0})'.format(e))
+        print('ERROR: {0}'.format(e))
 
 
 parser = argparse.ArgumentParser()
@@ -54,5 +53,4 @@ while True:
         client.read('/', wait=True, recursive=True, timeout=5)
         _write_config(client, config_path)
     except TimeoutError as e:
-        print 'timeout!'
         pass

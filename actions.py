@@ -1,4 +1,5 @@
 import etcd
+from urllib3.exceptions import TimeoutError
 
 
 def connect(host, port):
@@ -7,14 +8,24 @@ def connect(host, port):
 
 def write(key, value, host, port):
     client = connect(host, port)
-    return client.write(key, value)
+    try:
+        return client.write(key, value)
+    except TimeoutError as e:
+        print('ERROR: {0}'.format(e))
 
 
 def read(key, host, port):
     client = connect(host, port)
-    return client.read(key)
+    try:
+        return client.read(key)
+    except TimeoutError as e:
+        print('ERROR: {0}'.format(e))
 
 
 def delete(key, host, port):
     client = connect(host, port)
-    return client.delete(key)
+    try:
+        return client.delete(key)
+    except TimeoutError as e:
+        print('ERROR: {0}'.format(e))
+

@@ -18,6 +18,7 @@
         }],
         "key_filenames": [
             "/home/garinoth/Dropbox/AWS/aws-personal.pem"
-        ]
+        ],
+        "config_path": "config.json"
     }
 }

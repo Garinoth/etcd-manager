@@ -3,6 +3,7 @@ import fabfile
 import actions
 import argparse
 
+from urllib3.exceptions import TimeoutError
 
 parser = argparse.ArgumentParser()
 
@@ -11,8 +12,8 @@ parser.add_argument(
     help="Configuration file to be used")
 parser.add_argument(
     "action", type=str,
-    choices=['install_server', 'install_client', 'start',
-             'stop', 'restart', 'read', 'write', 'delete'],
+    choices=['install_server', 'install_client', 'start_server', 'stop_server',
+             'restart_server', 'start_client', 'read', 'write', 'delete'],
     help="Action to perform", nargs=1)
 parser.add_argument(
     "arguments", type=str,
@@ -30,13 +31,19 @@ else:
     execute(fabfile.load_config)
 
 if action in dir(fabfile):
-    execute(getattr(fabfile, action), *arguments)
+    try:
+        execute(getattr(fabfile, action), *arguments)
+    except Exception, e:
+        print('ERROR: {0}'.format(e))
 
 elif action in dir(actions):
     arguments.append(env.roledefs["server"][0])
     arguments.append(4001)
-    res = getattr(actions, action)(*arguments)
-    print res
+    try:
+        res = getattr(actions, action)(*arguments)
+        print '{0} succesful. Result:\n {1}'.format(action, res)
+    except Exception, e:
+        print('ERROR: {0}'.format(e))
 
 else:
     print 'Unrecognized action'
