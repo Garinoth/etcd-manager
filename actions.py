@@ -3,7 +3,7 @@ from urllib3.exceptions import TimeoutError
 
 
 def connect(host, port):
-    return etcd.Client(host=host, port=port)
+    return etcd.Client(host=host, port=port, allow_reconnect=True)
 
 
 def write(key, value, host, port):
@@ -28,4 +28,3 @@ def delete(key, host, port):
         return client.delete(key)
     except TimeoutError as e:
         print('ERROR: {0}'.format(e))
-

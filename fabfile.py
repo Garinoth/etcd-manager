@@ -22,6 +22,7 @@ def load_config(filepath="configs/default_config.json"):
 
         env.roledefs.update(roles)
         env.client = conf["client"]
+        env.server = conf["server"]
 
     except IOError as e:
         print('({0})'.format(e))
@@ -65,12 +66,12 @@ respawn
 respawn limit 15 5
 
 script
-    exec {0}/etcd/bin/etcd >> /var/log/etcd.log 2>&1
+    exec {0}/etcd/bin/etcd -discovery {1} >> /var/log/etcd.log 2>&1
 end script
 
 post-start script
 end script
-'''.format(pwd)
+'''.format(pwd, env.server["discovery_token"])
     try:
         f = open('etcd.conf', 'w')
         try:
@@ -92,6 +93,9 @@ end script
 @roles('server')
 @runs_once
 def install_server(go_file="lib/go.tar.gz", etcd_file="lib/etcd.tar.gz"):
+    if not env.server["discovery_token"] or env.server["discovery_token"] == "":
+        print('ERROR: You need to set a discovery token first')
+        exit(1)
     execute(install_go, go_file)
     execute(install_etcd, etcd_file)
 
